@@ -1,4 +1,4 @@
 # Otus Course
 
-## Lab1
-Create my first CMakeLists.txt. Write a simple "Hello World" program and create a .deb packet.
+## Lab3
+I am to create my custom allocator & use it with std::map and my custom container
