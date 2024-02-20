@@ -1,22 +1,13 @@
-#include <map>
-#include <vector>
-#include <iostream>
-
-int factorial(int n)
-{
-    int result = 1;
-    while(n) result *= n--;
-    return result;
-}
+#pragma once
 
 template<class T>
-class allocator
+class map_allocator
 {
 public:
 
     using value_type = T;
 
-    allocator() : 
+    map_allocator() : 
         is_reserved_(false), reserve_size_(10), 
         allocated_size_(0), mem_ptr_(nullptr) 
     {
@@ -24,20 +15,20 @@ public:
     }
 
     template<typename U>
-    allocator(const allocator<U>&) {};
+    map_allocator(const map_allocator<U>&) {};
 
     T* allocate(std::size_t n)
     {
         if(!is_reserved_)
         {
             std::size_t prev_n = n;
-
+            
             if (n < reserve_size_)
                 n = reserve_size_;
 
             if(mem_ptr_ = std::malloc(n * sizeof(T)))
             {
-                allocated_size_ += n;
+                allocated_size_ += prev_n;
                 is_reserved_ = true;
                 return static_cast<T*>(mem_ptr_);
             }
@@ -45,10 +36,10 @@ public:
                 throw std::bad_alloc();
         }
 
-        if (allocated_size_ + n < reserve_size_)
+        if (allocated_size_ + n <= reserve_size_)
         {
             allocated_size_ += n;
-            return static_cast<T*>(mem_ptr_) + allocated_size_;
+            return static_cast<T*>(mem_ptr_) + allocated_size_ - n;
         }
         else
         {
@@ -80,20 +71,4 @@ private:
 };
 
 template<typename T, typename U>
-bool operator==(const allocator<T>&, const allocator<U>&) { return false; }
-
-int main()
-{
-    std::map<int, int, std::less<int>, allocator<std::pair<int, int>>> mapa;
-
-    for(int i = 0; i < 10; i++) mapa.insert({ i, factorial(i) });
-
-
-    for(const auto& p : mapa)
-        std::cout << p.first << " " << p.second << std::endl;
-
-    std::cout << mapa.size() << std::endl;
-
-
-    return 0;
-}
+bool operator==(const map_allocator<T>&, const map_allocator<U>&) { return false; }
